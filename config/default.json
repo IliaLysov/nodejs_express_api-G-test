@@ -3,6 +3,6 @@
     "SMTPHost": "smtp.gmail.com",
     "SMTPPort": "587",
     "SMTPUser": "gardener.hg@gmail.com",
-    "APIURL": "http://localhost:4000",
+    "APIURL": "https://gardener-3tsd.onrender.com",
     "ClientURL": "http://localhost:3000"
 }
