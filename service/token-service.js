@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
-const config = require("config")
 const TokenModel = require('../models/schemas/token-model')
-const ApiError = require('../exceptions/api-error')
 
 class TokenService {
     generateTokens(payload) {

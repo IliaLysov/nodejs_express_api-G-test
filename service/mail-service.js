@@ -1,16 +1,15 @@
 const nodemailer = require('nodemailer')
-const config = require("config")
 
 
 class MailService {
 
     constructor() {
         this.transporter = nodemailer.createTransport({
-            host: config.get("SMTPHost"),
-            port: config.get("SMTPPort"),
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
             secure: false,
             auth: {
-                user: config.get("SMTPUser"),
+                user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASSWORD
             }
         })
@@ -20,7 +19,7 @@ class MailService {
         await this.transporter.sendMail({
             from: "gardener.hg@gmail.com",
             to,
-            subject: "Активация аккаунта для " + config.get("APIURL"),
+            subject: "Активация аккаунта для " + process.env.API_URL,
             text: '',
             html:
                 `

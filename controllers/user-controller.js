@@ -1,7 +1,3 @@
-const jwt = require('jsonwebtoken')
-const config = require("config")
-const userModel = require('../models/schemas/user-model')
-const bcrypt = require('bcryptjs')
 const {validationResult} = require('express-validator')
 const userService = require('../service/user-service') 
 const ApiError = require('../exceptions/api-error')
@@ -50,7 +46,7 @@ class UserController {
         try {
             const activationLink = req.params.link
             await userService.activate(activationLink)
-            return res.redirect(config.get('ClientURL'))
+            return res.redirect(process.env.CLIENT_URL)
         } catch (e) {
             console.log(e)
             res.send({message: "Server error"})

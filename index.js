@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
-const config = require('config')
 const authRouter = require('./routes/auth.routes')
 const dataRouter = require('./routes/data.routes')
 const corsMiddleware = require('./middleware/cors.middleware')
@@ -9,7 +8,7 @@ const errorMiddleware = require('./middleware/error.middleware')
 const cookieParser = require('cookie-parser')
 
 const app = express()
-const PORT = process.env.PORT || config.get('serverPort')
+const PORT = process.env.PORT || 4000
 
 app.use(corsMiddleware)
 app.use(express.json())

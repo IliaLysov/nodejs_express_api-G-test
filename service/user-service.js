@@ -1,7 +1,4 @@
 const bcrypt = require('bcryptjs')
-const config = require("config")
-const jwt = require('jsonwebtoken')
-const {check, validationResult} = require('express-validator')
 const UserModel = require('../models/schemas/user-model')
 const uuid = require('uuid')
 const mailService = require('./mail-service')
@@ -21,7 +18,7 @@ class UserService {
         const hashPassword = await bcrypt.hash(password, 3)
         const user = await UserModel.create({email, password: hashPassword, name, surname, activationLink})
 
-        await mailService.sendActivationMail(email, `${config.get('APIURL')}/api/auth/activate/${activationLink}`)
+        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/${activationLink}`)
 
         const userDto = new UserDto(user) //id, email, isActivated
         const tokens = tokenService.generateTokens({...userDto})

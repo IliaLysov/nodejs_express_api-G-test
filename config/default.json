@@ -1,8 +1,0 @@
-{
-    "serverPort": 4000,
-    "SMTPHost": "smtp.gmail.com",
-    "SMTPPort": "587",
-    "SMTPUser": "gardener.hg@gmail.com",
-    "APIURL": "https://gardener-3tsd.onrender.com",
-    "ClientURL": "http://localhost:3000"
-}
