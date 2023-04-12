@@ -5,11 +5,10 @@ const UserSchema = new Schema({
     password: {type: String, required: true},
     name: {type: String, required: true},
     surname: {type: String, required: true},
-    diskSpace: {type: Number, default: 1024**3*10},
-    usedSpace: {type: Number, default: 0},
     avatar: {type: String},
     isActivated: {type: Boolean, default: false},
-    activationLink: {type: String}
+    activationLink: {type: String},
+    seller: {type: Boolean, default: false}
 })
 
 module.exports = model('User', UserSchema)

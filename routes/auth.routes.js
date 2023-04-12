@@ -15,9 +15,11 @@ userController.registration)
 
 router.post('/login', userController.login)
 
+
 router.post('/logout', userController.logout) //удаляем refreshToken из БД
 router.get('/activate/:link', userController.activate) //активация аккаунта по ссылке
 router.get('/refresh', userController.refresh) //обновляем accessToken
 router.get('/users', authMiddleware, userController.getUsers) //получаем список пользователей - доступен только для авторизованных пользователей
+router.get('/seller', authMiddleware, userController.becomeASeller)
 
 module.exports = router

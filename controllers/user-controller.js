@@ -9,11 +9,9 @@ class UserController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
-
-
             const {email, password, name, surname} = req.body
             const userData = await userService.registration(email, password, name, surname)
-            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: "none"})
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json(userData)
         } catch (e) {
             next(e)
@@ -24,7 +22,7 @@ class UserController {
         try {
             const {email, password} = req.body
             const userData = await userService.login(email, password)
-            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: "none"})
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json(userData)
         } catch (e) {
             next(e)
@@ -35,7 +33,7 @@ class UserController {
         try {
             const {refreshToken} = req.cookies
             const token = await userService.logout(refreshToken)
-            res.clearCookie('refreshToken', {httpOnly: true, secure: true, sameSite: "none"})
+            res.clearCookie('refreshToken', {httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json(token) //лучше вернуть статус-код 200
         } catch (e) {
             next(e)
@@ -57,7 +55,7 @@ class UserController {
         try {
             const {refreshToken} = req.cookies
             const userData = await userService.refresh(refreshToken)
-            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: "none"})
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json(userData)
         } catch (e) {
             next(e)
@@ -68,6 +66,16 @@ class UserController {
         try {
             const users = await userService.getAllUsers()
             return res.json(users)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async becomeASeller(req, res, next) {
+        try {
+            const {refreshToken} = req.cookies
+            const result = await userService.becomeASeller(refreshToken)
+            return res.json(result)
         } catch (e) {
             next(e)
         }

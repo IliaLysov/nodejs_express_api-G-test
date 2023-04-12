@@ -5,6 +5,7 @@ const mailService = require('./mail-service')
 const tokenService = require('./token-service')
 const UserDto = require('../dtos/user-dto')
 const ApiError = require('../exceptions/api-error')
+const {Types} = require('mongoose')
 
 class UserService {
     async registration(email, password, name, surname) {
@@ -76,6 +77,18 @@ class UserService {
     async getAllUsers() {
         const users = await UserModel.find()
         return users
+    }
+
+    async becomeASeller(refreshToken) {
+        if (!refreshToken) {
+            throw ApiError.UnauthorizedError()
+        }
+        const userData = tokenService.validateRefreshToken(refreshToken)
+        const response = await UserModel.updateOne({_id: new Types.ObjectId(userData.id)}, {$set: {seller: true}})
+        const user = await UserModel.findById(userData.id)
+        const userDto = new UserDto(user)
+
+        return {response, user: userDto}
     }
 }
 

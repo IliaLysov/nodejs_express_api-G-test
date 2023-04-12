@@ -1,8 +1,9 @@
-require('dotenv').config()
+require('dotenv').config({path: `.env.${process.env.NODE_ENV}`})
 const express = require('express')
 const mongoose = require('mongoose')
 const authRouter = require('./routes/auth.routes')
 const dataRouter = require('./routes/data.routes')
+const productRouter = require('./routes/product.routes')
 const corsMiddleware = require('./middleware/cors.middleware')
 const errorMiddleware = require('./middleware/error.middleware')
 const cookieParser = require('cookie-parser')
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth', authRouter)
 app.use('/api/data', dataRouter)
+app.use('/api/products', productRouter)
 app.use(errorMiddleware) //всегда последним
 
 
