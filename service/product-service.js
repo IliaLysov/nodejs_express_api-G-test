@@ -26,7 +26,6 @@ class ProductService {
         if (candidate) {
             throw ApiError.BadRequest(`Растение ${name} уже существует`)
         }
-        console.log('service upload OneProductimages', images)
         const product = await ProductModel.create({name, description, quantity, price, images, created_at: userId, sellerName})
         return product
     }

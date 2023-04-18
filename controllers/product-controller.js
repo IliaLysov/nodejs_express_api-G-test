@@ -13,9 +13,7 @@ class ProductController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
-            console.log('controller uploadProduct images from req.files', req.files)
             const images = await productService.uploadImagesToCloud(req.files)
-            console.log('controller uploadProduct images response from cloud', images)
             const { name, description, quantity, price } = req.body
             const productData = await productService.uploadOneProduct(name, description, quantity, price, images, req.user.id, req.user.name)
             return res.json(productData)
