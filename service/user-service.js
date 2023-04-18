@@ -11,7 +11,7 @@ class UserService {
     async registration(email, password, name, surname) {
         const candidate = await UserModel.findOne({email})
         if (candidate) {
-            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`)
+            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`) //ловим error.middleware
         }
 
         const activationLink = uuid.v4()
@@ -31,7 +31,7 @@ class UserService {
     async activate(activationLink) {
         const user = await UserModel.findOne({activationLink})
         if (!user) {
-            throw ApiError.BadRequest('Некорректная ссылка активации')
+            throw ApiError.BadRequest('Некорректная ссылка активации') //ловим error.middleware
         }
         user.isActivated = true
         await user.save()
@@ -40,11 +40,11 @@ class UserService {
     async login(email, password) {
         const user = await UserModel.findOne({email})
         if (!user) {
-            throw ApiError.BadRequest(`Пользователь с почтой ${email} не был найден`)
+            throw ApiError.BadRequest(`Пользователь с почтой ${email} не был найден`) //ловим error.middleware
         }
         const isPassEquals = await bcrypt.compare(password, user.password)
         if (!isPassEquals) {
-            throw ApiError.BadRequest('Неверный пароль')
+            throw ApiError.BadRequest('Неверный пароль') //ловим error.middleware
         }
         const userDto = new UserDto(user)
         const tokens = tokenService.generateTokens({...userDto})
@@ -59,13 +59,13 @@ class UserService {
 
     async refresh(refreshToken) {
         if (!refreshToken) {
-            throw ApiError.UnauthorizedError()
+            throw ApiError.UnauthorizedError() //ловим error.middleware
         }
         const userData = tokenService.validateRefreshToken(refreshToken)
         const tokenFromDb = await tokenService.findToken(refreshToken)
 
         if (!userData || !tokenFromDb) {
-            throw ApiError.UnauthorizedError()
+            throw ApiError.UnauthorizedError() //ловим error.middleware
         }
         const user = await UserModel.findById(userData.id)
         const userDto = new UserDto(user)
@@ -81,7 +81,7 @@ class UserService {
 
     async becomeASeller(refreshToken) {
         if (!refreshToken) {
-            throw ApiError.UnauthorizedError()
+            throw ApiError.UnauthorizedError() //ловим error.middleware
         }
         const userData = tokenService.validateRefreshToken(refreshToken)
         const response = await UserModel.updateOne({_id: new Types.ObjectId(userData.id)}, {$set: {seller: true}})
