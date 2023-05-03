@@ -2,8 +2,6 @@
 const { validationResult } = require('express-validator')
 const ApiError = require('../exceptions/api-error')
 const productService = require('../service/product-service')
-const fs = require('fs')
-
 
 
 class ProductController {
@@ -13,9 +11,13 @@ class ProductController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
-            const images = await productService.uploadImagesToCloud(req.files)
-            const { name, description, quantity, price } = req.body
-            const productData = await productService.uploadOneProduct(name, description, quantity, price, images, req.user.id, req.user.name)
+            // const imagesInfo = [] //will delete
+            const imagesInfo = await productService.uploadImagesToCloud(req.files)
+            const body = req.body
+            body.sellerName = req.user.name
+            body.created_at = req.user.id
+            body.images = imagesInfo
+            const productData = await productService.uploadOneProduct(body)
             return res.json(productData)
         } catch (e) {
             next(e)
@@ -40,6 +42,23 @@ class ProductController {
             next(e)
         }
 
+    }
+
+    async updateProduct(req, res, next) {
+        try {
+
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async deleteProduct(req, res, next) {
+        try {
+            console.log('deleteProductBody', req.body)
+            return res.sendStatus(200)
+        } catch (e) {
+            next(e)
+        }
     }
 }
 

@@ -15,5 +15,7 @@ const imagesMiddleware = multer({storage: storage}) //imagesMiddleware
 router.post('/upload', authMiddleware, sellerMiddleware, imagesMiddleware.array('images', 5), productController.uploadProduct)
 router.get('/all', productController.getAllProducts)
 router.get('/own', authMiddleware, productController.getOwnProducts)
+router.patch('/update', authMiddleware, productController.updateProduct)
+router.delete('/delete', (req, res) => {console.log(req.body); return res.sendStatus(200)})
 
 module.exports = router

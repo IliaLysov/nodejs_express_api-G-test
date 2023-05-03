@@ -1,6 +1,7 @@
 const ProductModel = require('../models/schemas/product-model')
 const ApiError = require('../exceptions/api-error')
 const easyYandexS3 = require('easy-yandex-s3').default
+const {Types} = require('mongoose')
 
 const s3 = new easyYandexS3({
     auth: {
@@ -21,12 +22,12 @@ class ProductService {
         return uploadedFiles
     }
 
-    async uploadOneProduct(name, description, quantity, price, images, userId, sellerName) {
-        const candidate = await ProductModel.findOne({created_at: userId, name})
+    async uploadOneProduct(data) {
+        const candidate = await ProductModel.findOne({created_at: data.created_at, name: data.name})
         if (candidate) {
-            throw ApiError.BadRequest(`Растение ${name} уже существует`)
+            throw ApiError.BadRequest(`Растение ${data.name} уже существует`)
         }
-        const product = await ProductModel.create({name, description, quantity, price, images, created_at: userId, sellerName})
+        const product = await ProductModel.create(data)
         return product
     }
 
@@ -38,6 +39,11 @@ class ProductService {
     async getOwnProducts(userId) {
         const products = await ProductModel.find({created_at: userId})
         return products
+    }
+
+    async deleteOneProduct(productId) {
+        const response = await ProductModel.deleteOne({_id: Types.ObjectId(productId)})
+        return response
     }
 }
 
