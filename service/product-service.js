@@ -16,7 +16,7 @@ class ProductService {
     async uploadImagesToCloud(images) {
         let uploadedFiles = []
         for (let i=0; i < images.length; i++) {
-            const file = await s3.Upload({buffer: images[i].buffer}, '/test/')
+            const file = await s3.Upload({buffer: images[i].buffer}, '/gardener-plants-images/')
             uploadedFiles.push(file)
         }        
         return uploadedFiles
@@ -42,7 +42,7 @@ class ProductService {
     }
 
     async deleteOneProduct(productId) {
-        const response = await ProductModel.deleteOne({_id: Types.ObjectId(productId)})
+        const response = await ProductModel.deleteOne({_id: new Types.ObjectId(productId)})
         return response
     }
 }

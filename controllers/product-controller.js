@@ -54,8 +54,9 @@ class ProductController {
 
     async deleteProduct(req, res, next) {
         try {
-            console.log('deleteProductBody', req.body)
-            return res.sendStatus(200)
+            const {id} = req.body
+            const response = await productService.deleteOneProduct(id)
+            return res.json(response)
         } catch (e) {
             next(e)
         }

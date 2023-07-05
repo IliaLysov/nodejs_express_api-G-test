@@ -16,6 +16,6 @@ router.post('/upload', authMiddleware, sellerMiddleware, imagesMiddleware.array(
 router.get('/all', productController.getAllProducts)
 router.get('/own', authMiddleware, productController.getOwnProducts)
 router.patch('/update', authMiddleware, productController.updateProduct)
-router.delete('/delete', (req, res) => {console.log(req.body); return res.sendStatus(200)})
+router.post('/delete', authMiddleware, productController.deleteProduct)
 
 module.exports = router
