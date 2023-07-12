@@ -12,7 +12,10 @@ class ProductController {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
             // const imagesInfo = [] //will delete
+
+            
             const imagesInfo = await productService.uploadImagesToCloud(req.files)
+            
             const body = req.body
             body.sellerName = req.user.name
             body.created_at = req.user.id

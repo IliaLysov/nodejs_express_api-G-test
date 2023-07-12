@@ -8,7 +8,7 @@ const s3 = new easyYandexS3({
         accessKeyId: process.env.YANDEX_CLOUD_ID,
         secretAccessKey: process.env.YANDEX_CLOUD_KEY
     },
-    Bucket: 'gardener-storage',
+    Bucket: 'gardener-plants',
     debug: false
 })
 
@@ -16,9 +16,9 @@ class ProductService {
     async uploadImagesToCloud(images) {
         let uploadedFiles = []
         for (let i=0; i < images.length; i++) {
-            const file = await s3.Upload({buffer: images[i].buffer}, '/gardener-plants-images/')
+            const file = await s3.Upload({buffer: images[i].buffer}, '/images/')
             uploadedFiles.push(file)
-        }        
+        }
         return uploadedFiles
     }
 
