@@ -22,6 +22,10 @@ class ProductService {
         return uploadedFiles
     }
 
+    async deleteImagesFromCloud(images) {
+        await Promise.all(images.map(async key => await s3.Remove(key)))
+    }
+
     async uploadOneProduct(data) {
         const candidate = await ProductModel.findOne({created_at: data.created_at, name: data.name})
         if (candidate) {
@@ -31,19 +35,51 @@ class ProductService {
         return product
     }
 
-    async getAllProducts() {
-        const products = await ProductModel.find()
+    async getAllProducts(skip, filter, sort) {
+        const products = await ProductModel.find().limit(10).skip(skip)
         return products
     }
 
-    async getOwnProducts(userId) {
-        const products = await ProductModel.find({created_at: userId})
+    async getOwnProducts(skip, filter, sort, id) {
+        const products = await ProductModel.find({created_at: id}).limit(10).skip(skip)
         return products
     }
 
     async deleteOneProduct(productId) {
+        const product = await ProductModel.findOne({_id: new Types.ObjectId(productId)})
+       
+        await Promise.all(product.images.map(async image => await s3.Remove(image.Key)))
+
         const response = await ProductModel.deleteOne({_id: new Types.ObjectId(productId)})
         return response
+    }
+
+    async updateOneProduct(data, newImages, deleteImages) {
+        const id = data.id
+        delete data.id
+
+        deleteImages && await ProductModel.updateOne({_id: new Types.ObjectId(id)}, {$pull: {images: {Key: {$in: deleteImages}}}})
+
+        const response = await ProductModel.updateOne(
+            {_id: new Types.ObjectId(id)},
+            {
+                $set: data,
+                $push: {images: {$each: newImages}}
+            }    
+        )
+
+        return response
+    }
+
+    async getOneProduct(id) {
+        const product = await ProductModel.findById({_id: new Types.ObjectId(id)})
+        return product
+    }
+
+    async getManyProducts(array) {
+        const objectId = array.map(id => new Types.ObjectId(id))
+        const products = await ProductModel.find({_id: {$in: objectId}})
+        return products
     }
 }
 

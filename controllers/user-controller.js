@@ -9,8 +9,8 @@ class UserController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
-            const {email, password, name, surname} = req.body
-            const userData = await userService.registration(email, password, name, surname)
+            const {email, password, name, surname, cart, favorite} = req.body
+            const userData = await userService.registration(email, password, name, surname, cart, favorite)
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json(userData)
         } catch (e) {
@@ -76,6 +76,40 @@ class UserController {
             const {refreshToken} = req.cookies
             const result = await userService.becomeASeller(refreshToken)
             return res.json(result)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async setAvatar(req, res, next) {
+        try {
+            const data = {}
+            data.user = req.user.id
+            data.images = req.files
+            const response = await userService.setAvatar(data)
+            return res.json(response)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async addToCart(req, res, next) {
+        try {
+            const userId = req.user.id
+            const productsInfo = req.body
+            const user = await userService.addToCart(userId, productsInfo)
+            return res.json(user)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async addToFavorite(req, res, next) {
+        try {
+            const userId = req.user.id
+            const productsIdArray = req.body
+            const user = await userService.addToFavorite(userId, productsIdArray)
+            return res.json(user)
         } catch (e) {
             next(e)
         }

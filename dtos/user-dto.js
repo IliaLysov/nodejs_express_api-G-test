@@ -5,6 +5,9 @@ module.exports = class UserDto {
     id
     isActivated
     seller
+    avatar
+    cart
+    favorite
 
     constructor(model) {
         this.name = model.name
@@ -13,5 +16,8 @@ module.exports = class UserDto {
         this.id = model._id
         this.isActivated = model.isActivated
         this.seller = model.seller
+        this.avatar = model.avatar
+        this.cart = model.cart
+        this.favorite = model.favorite
     }
 }

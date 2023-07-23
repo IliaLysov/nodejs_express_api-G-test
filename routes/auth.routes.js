@@ -1,10 +1,13 @@
 const Router = require('express')
 const {check, validationResult} = require('express-validator')
 const router = new Router()
+const multer = require('multer')
 
 const userController = require('../controllers/user-controller')
 const authMiddleware = require('../middleware/auth.middleware')
 
+const storage = multer.memoryStorage()
+const imagesMiddleware = multer({storage: storage})
 
 router.post('/registration',
 [
@@ -21,5 +24,9 @@ router.get('/activate/:link', userController.activate) //активация ак
 router.get('/refresh', userController.refresh) //обновляем accessToken
 router.get('/users', authMiddleware, userController.getUsers) //получаем список пользователей - доступен только для авторизованных пользователей
 router.get('/seller', authMiddleware, userController.becomeASeller)
+router.post('/avatar', authMiddleware, imagesMiddleware.array('avatar', 1), userController.setAvatar)
+router.post('/addToCart', authMiddleware, userController.addToCart)
+router.post('/addToFavorite', authMiddleware, userController.addToFavorite)
+
 
 module.exports = router

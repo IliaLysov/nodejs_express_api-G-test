@@ -31,6 +31,7 @@ const ProductSchema = new Schema({
     plantTrunkGirth: {type: String},
     created_at: {type: Types.ObjectId, ref: 'User'},
     sellerName: {type: String},
+    sellerAvatar: {type: String},
     images: [{
         ETag: {type: String},
         Location: {type: String},
