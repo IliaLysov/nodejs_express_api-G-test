@@ -71,8 +71,16 @@ class ProductService {
         return filters
     }
 
-    async getOwnProducts(skip, filter, sort, id) {
-        const products = await ProductModel.find({created_at: id}).limit(10).skip(skip)
+    async getOwnProducts(skip, appliedFilters, sort, id) {
+        const filter = []
+
+        appliedFilters?.price && filter.push({price: {$gte: appliedFilters.price.min, $lte: appliedFilters.price.max}})
+
+        const products = await ProductModel.find(appliedFilters ? {
+            created_at: id,
+            $and: filter
+        } : {created_at: id}).limit(10).skip(skip)
+        // const products = await ProductModel.find({created_at: id}).limit(10).skip(skip)
         return products
     }
 
