@@ -35,15 +35,48 @@ class ProductService {
         return product
     }
 
-    async getAllProducts(skip, filter, sort) {
-        const products = await ProductModel.find().limit(10).skip(skip)
+    async getAllProducts(skip, appliedFilters, sort) {
+        const filter = []
+
+        appliedFilters?.price && filter.push({price: {$gte: appliedFilters.price.min, $lte: appliedFilters.price.max}})
+
+
+        const products = await ProductModel.find(appliedFilters ? {
+            $and: filter
+        } : {}).limit(10).skip(skip)
         return products
+    }
+
+    async getFilters(id) {
+        const body = [
+            {
+                $group: {
+                    _id: null,
+                    maxPrice: {$max: '$price'},
+                    minPrice: {$min: '$price'}
+                }
+            }
+        ]
+
+        id && body.unshift({
+            $match: {
+                created_at: new Types.ObjectId(id)
+            }
+        })
+
+        const response = await ProductModel.aggregate(body)
+        const filters = {
+            price: {min: response[0].minPrice, max: response[0].maxPrice}
+        }
+        return filters
     }
 
     async getOwnProducts(skip, filter, sort, id) {
         const products = await ProductModel.find({created_at: id}).limit(10).skip(skip)
         return products
     }
+
+    
 
     async deleteOneProduct(productId) {
         const product = await ProductModel.findOne({_id: new Types.ObjectId(productId)})

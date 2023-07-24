@@ -34,9 +34,11 @@ class ProductController {
 
     async getAllProducts(req, res, next) {
         try {
-            const {skip, filter, sort} = req.body
-            const products = await productService.getAllProducts(skip, filter, sort)
-            return res.json(products)
+            const {skip, appliedFilters, sort} = req.body
+            const products = await productService.getAllProducts(skip, appliedFilters, sort)
+            const filters = await productService.getFilters()
+            const response = {products, filters}
+            return res.json(response)
         } catch (e) {
             next(e)
         }
@@ -44,10 +46,12 @@ class ProductController {
 
     async getOwnProducts(req, res, next) {
         try {
-            const {skip, filter, sort} = req.body
+            const {skip, appliedFilters, sort} = req.body
             const {id} = req.user
-            const products = await productService.getOwnProducts(skip, filter, sort, id)
-            return res.json(products)
+            const products = await productService.getOwnProducts(skip, appliedFilters, sort, id)
+            const filters = await productService.getFilters(id)
+            const response = {products, filters}
+            return res.json(response)
         } catch (e) {
             next(e)
         }
