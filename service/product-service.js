@@ -26,15 +26,18 @@ class ProductService {
         await Promise.all(images.map(async key => await s3.Remove(key)))
     }
 
-    async uploadOneProduct(data) {
-        const candidate = await ProductModel.findOne({created_at: data.created_at, name: data.name})
+    async uploadOneProduct(data, images) {
+        const candidate = await ProductModel.findOne({name: data.name, organizationId: data.organizationId})
         if (candidate) {
             throw ApiError.BadRequest(`Растение ${data.name} уже существует`)
         }
+        const imagesInfo = await this.uploadImagesToCloud(images)
+        data.images = imagesInfo
+
         const product = await ProductModel.create(data)
         return product
     }
-
+    
     async getAllProducts(skip, appliedFilters, sort) {
         const filter = []
 
@@ -60,12 +63,16 @@ class ProductService {
 
         id && body.unshift({
             $match: {
-                created_at: new Types.ObjectId(id)
+                organizationId: new Types.ObjectId(id)
             }
         })
 
         const response = await ProductModel.aggregate(body)
-        const filters = {
+        if (response.length === 0) {
+            return null
+        }
+        const filters = 
+        {
             price: {min: response[0].minPrice, max: response[0].maxPrice}
         }
         return filters
@@ -77,9 +84,9 @@ class ProductService {
         appliedFilters?.price && filter.push({price: {$gte: appliedFilters.price.min, $lte: appliedFilters.price.max}})
 
         const products = await ProductModel.find(appliedFilters ? {
-            created_at: id,
+            organizationId: new Types.ObjectId(id),
             $and: filter
-        } : {created_at: id}).limit(10).skip(skip)
+        } : {organizationId: new Types.ObjectId(id)}).limit(10).skip(skip)
         // const products = await ProductModel.find({created_at: id}).limit(10).skip(skip)
         return products
     }

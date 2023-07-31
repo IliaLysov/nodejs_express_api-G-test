@@ -7,6 +7,9 @@ const tokenService = require('./token-service')
 const UserDto = require('../dtos/user-dto')
 const ApiError = require('../exceptions/api-error')
 const {Types} = require('mongoose')
+const OrganizationModel = require('../models/schemas/organization-model')
+const OrganizationDto = require('../dtos/organization-dto')
+const CartService = require('./cart-service')
 
 const easyYandexS3 = require('easy-yandex-s3').default
 const s3 = new easyYandexS3({
@@ -20,7 +23,7 @@ const s3 = new easyYandexS3({
 
 
 class UserService {
-    async registration(email, password, name, surname, cart, favorite) {
+    async registration({email, username, name, surname, password, subscribe}) {
         const candidateEmail = await UserModel.findOne({email})
         if (candidateEmail) {
             throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`) //ловим error.middleware
@@ -33,9 +36,10 @@ class UserService {
         const activationLink = uuid.v4()
 
         const hashPassword = await bcrypt.hash(password, 3)
-        const user = await UserModel.create({email, password: hashPassword, name, surname, activationLink, cart, favorite})
+        const user = await UserModel.create({email, username, name, surname,  password: hashPassword, subscribe, activationLink})
 
         await mailService.sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/${activationLink}`)
+
 
         const userDto = new UserDto(user) //id, email, isActivated
         const tokens = tokenService.generateTokens({...userDto})
@@ -65,7 +69,11 @@ class UserService {
         const userDto = new UserDto(user)
         const tokens = tokenService.generateTokens({...userDto})
         await tokenService.saveToken(userDto.id, tokens.refreshToken)
-        return {...tokens, user: userDto}
+        const organization = await OrganizationModel.findOne({created_at: userDto.id})
+        const organizationDto = organization ? new OrganizationDto(organization) : null
+        const cart = await CartService.getAll(userDto.id)
+
+        return {...tokens, user: userDto, organization: organizationDto, cart}
     }
 
     async logout(refreshToken) {
@@ -87,7 +95,11 @@ class UserService {
         const userDto = new UserDto(user)
         const tokens = tokenService.generateTokens({...userDto})
         await tokenService.saveToken(userDto.id, tokens.refreshToken)
-        return {...tokens, user: userDto}
+        const organization = await OrganizationModel.findOne({created_at: userDto.id})
+        const organizationDto = organization ? new OrganizationDto(organization) : null
+        const cart = await CartService.getAll(userDto.id)
+
+        return {...tokens, user: userDto, organization: organizationDto, cart}
     }
 
     async getAllUsers() {
@@ -137,6 +149,10 @@ class UserService {
         document.favorite = productsIdArray
         const userDto = new UserDto(document)
         return userDto
+    }
+
+    async setOrganization(userId, organizationId) {
+        await UserModel.updateOne({_id: new Types.ObjectId(userId)}, {$set: {organization: organizationId}})
     }
 }
 

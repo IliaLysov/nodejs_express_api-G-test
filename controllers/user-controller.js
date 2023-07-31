@@ -1,18 +1,33 @@
 const {validationResult} = require('express-validator')
 const userService = require('../service/user-service') 
 const ApiError = require('../exceptions/api-error')
+const CartService = require('../service/cart-service')
+const FavoritesService = require('../service/favorites-service')
 
 class UserController {
     async registration(req, res, next) {
         try {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
+                return next(ApiError.BadRequest(`Ошибка при валидации ${errors.array().map(el => el.msg).join(' ')}`, errors.array()))
             }
-            const {email, password, name, surname, cart, favorite} = req.body
-            const userData = await userService.registration(email, password, name, surname, cart, favorite)
+
+            const {cart, favorites, ...user} = req.body
+
+            const userData = await userService.registration(user)
+
+            const newCart = cart.map(obj => {
+                obj.userId = userData.user.id
+                return obj
+            })
+            const dtoCart = await CartService.setAll(newCart)
+
+            const newFavorites = favorites.map(obj => ({...obj, userId: userData.user.id}))
+            const dtoFavorites = await FavoritesService.setAll(newFavorites)
+            
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
-            return res.json(userData)
+            return res.json({favorites: dtoFavorites, cart: dtoCart, ...userData})
+
         } catch (e) {
             next(e)
         }

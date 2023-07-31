@@ -2,9 +2,21 @@ const {Schema, model, Types} = require('mongoose')
 
 const ProductSchema = new Schema({
     name: {type: String, required: true},
+    latin: {
+        type: String,
+        require: true,
+        validate: {
+            validator: function (value) {
+                const latinRegex = /^[a-zA-Z -]*$/
+                return latinRegex.test(value)
+            },
+            message: props => `${props.value} is not a valid nickname. Only Latin characters are allowed.`
+        },
+    },
     description: {type: String},
     price: {type: Number},
     quantity: {type: Number},
+    onSale: {type: Boolean, default: true},
     rootPacking: {type: String},
     packageType: {type: String},
     packageCount: {type: Number},
@@ -30,8 +42,11 @@ const ProductSchema = new Schema({
     plantTrunkHeight: {type: String},
     plantTrunkGirth: {type: String},
     created_at: {type: Types.ObjectId, ref: 'User'},
-    sellerName: {type: String},
-    sellerAvatar: {type: String},
+    organizationId: {type: Types.ObjectId, ref: 'Organization'},
+    organizationInfo: {
+        nickname: {type: String},
+        logo: {type: String}
+    },
     images: [{
         ETag: {type: String},
         Location: {type: String},

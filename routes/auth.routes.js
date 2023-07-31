@@ -12,7 +12,7 @@ const imagesMiddleware = multer({storage: storage})
 router.post('/registration',
 [
     check('email', "Incorrect email").isEmail(),
-    check('password', "Password must be longer than 3 and shorter than 12").isLength({min: 3, max: 12})
+    check('password', "Password must be longer than 3 and shorter than 30").isLength({min: 3, max: 30})
 ],
 userController.registration)
 

@@ -1,13 +1,12 @@
 module.exports = class UserDto {
+    username
+    organization
+    email
     name
     surname
-    email
-    id
-    isActivated
-    seller
     avatar
-    cart
-    favorite
+    isActivated
+    id
 
     constructor(model) {
         this.name = model.name
@@ -15,9 +14,8 @@ module.exports = class UserDto {
         this.email = model.email
         this.id = model._id
         this.isActivated = model.isActivated
-        this.seller = model.seller
         this.avatar = model.avatar
-        this.cart = model.cart
-        this.favorite = model.favorite
+        this.username = model.username
+        this.organization = model.organization
     }
 }

@@ -4,6 +4,7 @@ const ApiError = require('../exceptions/api-error')
 const productService = require('../service/product-service')
 const { response } = require('express')
 const userService = require('../service/user-service')
+const organizationService = require('../service/organization-service')
 
 
 class ProductController {
@@ -13,20 +14,26 @@ class ProductController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
             }
-            // const imagesInfo = [] //will delete
-
-            const imagesInfo = await productService.uploadImagesToCloud(req.files)
+            const organization = await organizationService.getOrganizationByCreated_atId(req.user.id)
+            
+            if (!organization || !organization.approved) {
+                return next(ApiError.BadRequest('У вас нет питомника или ваш питомник еще не зарегистрирован'))
+            }            
+            if (organization._id.toString() !== req.user.organization) {
+                return next(ApiError.BadRequest(`Вы не можете добавлять растения от имени питомника ${organization.name}`))
+            }
+            
             
             const body = req.body
-            
-            body.sellerName = req.user.name
             body.created_at = req.user.id
-            body.sellerAvatar = req.user.avatar.Location
-            body.images = imagesInfo
-            const productData = await productService.uploadOneProduct(body)
+            body.organizationId = organization._id
+            body.organizationInfo = {
+                nickname: organization.nickname,
+                logo: organization.logo.Location
+            }            
+
+            const productData = await productService.uploadOneProduct(body, req.files)
             return res.json(productData)
-            // console.log(productData)
-            // return res.json('ok')
         } catch (e) {
             next(e)
         }
@@ -46,10 +53,10 @@ class ProductController {
 
     async getOwnProducts(req, res, next) {
         try {
-            const {skip, appliedFilters, sort} = req.body
+            const {skip, appliedFilters, sort, organizationId} = req.body
             const {id} = req.user
-            const products = await productService.getOwnProducts(skip, appliedFilters, sort, id)
-            const filters = await productService.getFilters(id)
+            const products = await productService.getOwnProducts(skip, appliedFilters, sort, organizationId)
+            const filters = await productService.getFilters(organizationId)
             const response = {products, filters}
             return res.json(response)
         } catch (e) {
