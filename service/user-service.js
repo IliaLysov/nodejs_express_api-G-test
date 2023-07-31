@@ -10,6 +10,7 @@ const {Types} = require('mongoose')
 const OrganizationModel = require('../models/schemas/organization-model')
 const OrganizationDto = require('../dtos/organization-dto')
 const CartService = require('./cart-service')
+const favoritesService = require('./favorites-service')
 
 const easyYandexS3 = require('easy-yandex-s3').default
 const s3 = new easyYandexS3({
@@ -98,8 +99,9 @@ class UserService {
         const organization = await OrganizationModel.findOne({created_at: userDto.id})
         const organizationDto = organization ? new OrganizationDto(organization) : null
         const cart = await CartService.getAll(userDto.id)
+        const favorites  = await favoritesService.getAll(userDto.id)
 
-        return {...tokens, user: userDto, organization: organizationDto, cart}
+        return {...tokens, user: userDto, organization: organizationDto, cart, favorites}
     }
 
     async getAllUsers() {

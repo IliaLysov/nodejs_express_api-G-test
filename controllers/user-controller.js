@@ -24,6 +24,8 @@ class UserController {
 
             const newFavorites = favorites.map(obj => ({...obj, userId: userData.user.id}))
             const dtoFavorites = await FavoritesService.setAll(newFavorites)
+
+            console.log('dtoFavorites', dtoFavorites)
             
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json({favorites: dtoFavorites, cart: dtoCart, ...userData})
