@@ -25,8 +25,6 @@ class UserController {
             const newFavorites = favorites.map(obj => ({...obj, userId: userData.user.id}))
             const dtoFavorites = await FavoritesService.setAll(newFavorites)
 
-            console.log('dtoFavorites', dtoFavorites)
-            
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
             return res.json({favorites: dtoFavorites, cart: dtoCart, ...userData})
 
@@ -39,8 +37,9 @@ class UserController {
         try {
             const {email, password} = req.body
             const userData = await userService.login(email, password)
-            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
-            return res.json(userData)
+            const {refreshToken, ...response} = userData
+            res.cookie('refreshToken', refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
+            return res.json(response)
         } catch (e) {
             next(e)
         }
@@ -72,7 +71,9 @@ class UserController {
         try {
             const {refreshToken} = req.cookies
             const userData = await userService.refresh(refreshToken)
+            
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: Boolean(process.env.SECURE), sameSite: "none"})
+            delete userData.refreshToken
             return res.json(userData)
         } catch (e) {
             next(e)
