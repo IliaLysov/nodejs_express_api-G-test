@@ -73,8 +73,9 @@ class UserService {
         const organization = await OrganizationModel.findOne({created_at: userDto.id})
         const organizationDto = organization ? new OrganizationDto(organization) : null
         const cart = await CartService.getAll(userDto.id)
+        const favorites  = await favoritesService.getAll(userDto.id)
 
-        return {...tokens, user: userDto, organization: organizationDto, cart}
+        return {...tokens, user: userDto, organization: organizationDto, cart, favorites}
     }
 
     async logout(refreshToken) {
@@ -87,7 +88,6 @@ class UserService {
             throw ApiError.UnauthorizedError() //ловим error.middleware
         }
         const userData = tokenService.validateRefreshToken(refreshToken)
-        console.log('refresh log', userData, refreshToken)
         const tokenFromDb = await tokenService.findToken(refreshToken)
 
         if (!userData || !tokenFromDb) {
